@@ -30,8 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'name',
-            'tech_stack:ntext',
-            'descritption:ntext',
+            'tech_stack:raw',
+            'descritption:raw',
             'start_date',
             'end_date',
             [
