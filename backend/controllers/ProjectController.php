@@ -67,28 +67,28 @@ class ProjectController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate()
+    public function actionCreate() // Phương thức tạo mới một dự án.
     {
-        $model = new Project();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post())) {
-                $model->imageFile = UploadedFile::getInstance($model,'imageFile');
-                if( $model->save()){
-                    $model->saveImage();
-                    Yii::$app->getSession()->setFlash('success','Thành Công');
-                    return $this->redirect(['view', 'id' => $model->id]);
+        $model = new Project(); // Khởi tạo một đối tượng Project mới.
+    
+        if ($this->request->isPost) { // Kiểm tra xem yêu cầu có phải là POST không.
+            if ($model->load($this->request->post())) { // Tải dữ liệu từ POST vào mô hình.
+                $model->imageFile = UploadedFile::getInstance($model, 'imageFile'); // Lấy tệp hình ảnh từ yêu cầu.
+                if ($model->save()) { // Lưu mô hình vào cơ sở dữ liệu.
+                    $model->saveImage(); // Lưu hình ảnh liên quan đến dự án.
+                    Yii::$app->getSession()->setFlash('success', 'Thành Công'); // Thiết lập thông báo thành công.
+                    return $this->redirect(['view', 'id' => $model->id]); // Chuyển hướng đến trang xem dự án vừa tạo.
                 }
-              
             }
         } else {
-            $model->loadDefaultValues();
+            $model->loadDefaultValues(); // Tải các giá trị mặc định vào mô hình nếu không phải là yêu cầu POST.
         }
-
-        return $this->render('create', [
+    
+        return $this->render('create', [ // Hiển thị trang tạo mới với mô hình đã tải.
             'model' => $model,
         ]);
     }
+    
 
     /**
      * Updates an existing Project model.
