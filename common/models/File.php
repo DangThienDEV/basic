@@ -68,4 +68,8 @@ class File extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Testimonial::class, ['customer_image_id' => 'id']);
     }
+    // sử dụng để lấy 1 giá trị tuyệt đối của Url để truyền vào view: Bao gồm nối chuỗi từ base_url(định dạng url căn bản) + name file ảnh => đường dẫn tuyệt đối
+    public function absoluterUrl(){
+        return rtrim($this->base_url, '/') . '/' . $this->name;
+    }    
 }

@@ -1,114 +1,141 @@
 <?php
 
-namespace common\models; // Chỉ định không gian tên cho mô hình, giúp tổ chức mã nguồn.
+namespace common\models;
 
-use Yii; // Nhập lớp Yii, cung cấp các chức năng tiện ích cho ứng dụng.
-use yii\web\UploadedFile; // Nhập lớp UploadedFile để xử lý tệp tải lên.
+use Yii;
+use yii\web\UploadedFile;
+
 
 /**
- * Đây là lớp mô hình cho bảng "project".
+ * This is the model class for table "project".
  *
- * @property int $id // ID của dự án.
- * @property string $name // Tên dự án.
- * @property string $tech_stack // Công nghệ sử dụng trong dự án.
- * @property string $description // Mô tả dự án.
- * @property string|null $start_date // Ngày bắt đầu dự án.
- * @property string|null $end_date // Ngày kết thúc dự án.
+ * @property int $id
+ * @property string $name
+ * @property string $tech_stack
+ * @property string $descritption
+ * @property string|null $start_date
+ * @property string|null $end_date
  *
- * @property ProjectImage[] $projectImages // Mối quan hệ với mô hình ProjectImage.
- * @property Testimonial[] $testimonials // Mối quan hệ với mô hình Testimonial.
+ * @property ProjectImage[] $Images
+ * @property Testimonial[] $testimonials
  */
-class Project extends \yii\db\ActiveRecord // Lớp Project kế thừa từ ActiveRecord, cho phép tương tác với cơ sở dữ liệu.
+class Project extends \yii\db\ActiveRecord
 {
     /**
-     * @var UploadedFile; // Khai báo thuộc tính để lưu trữ tệp hình ảnh tải lên.
+     * @var UploadedFile;
      */
-    public $imageFile; // Thuộc tính để lưu trữ tệp hình ảnh.
-
+    public $imageFile;
     /**
      * {@inheritdoc}
      */
-    public static function tableName() // Phương thức xác định tên bảng trong cơ sở dữ liệu.
+
+    public static function tableName()
     {
-        return 'project'; // Trả về tên bảng "project".
+        return 'project';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules() // Phương thức xác định các quy tắc xác thực cho mô hình.
+    public function rules()
     {
         return [
-            [['name', 'tech_stack', 'description'], 'required'], // Các thuộc tính này là bắt buộc.
-            [['tech_stack', 'description'], 'string'], // Các thuộc tính này phải là chuỗi.
-            [['start_date', 'end_date'], 'safe'], // Các thuộc tính này có thể chứa dữ liệu không được xác thực.
-            [['name'], 'string', 'max' => 255], // Tên phải là chuỗi với độ dài tối đa là 255 ký tự.
-            [['imageFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg'], // Tệp tải lên phải là một trong các định dạng hình ảnh.
+            [['name', 'tech_stack', 'descritption'], 'required'],
+            [['tech_stack', 'descritption'], 'string'],
+            [['start_date', 'end_date'], 'safe'],
+            [['name'], 'string', 'max' => 255],
+            [['imageFile'], 'file', 'skipOnEmpty' => false,  'extensions' => 'png, jpg, jpeg' , 'maxFiles' => 10],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels() // Phương thức cung cấp nhãn cho các thuộc tính.
+    public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'), // Nhãn cho ID.
-            'name' => Yii::t('app', 'Name'), // Nhãn cho Tên.
-            'tech_stack' => Yii::t('app', 'Tech Stack'), // Nhãn cho Công nghệ.
-            'description' => Yii::t('app', 'Description'), // Nhãn cho Mô tả.
-            'start_date' => Yii::t('app', 'Start Date'), // Nhãn cho Ngày bắt đầu.
-            'end_date' => Yii::t('app', 'End Date'), // Nhãn cho Ngày kết thúc.
+            'id' => Yii::t('app', 'ID'),
+            'name' => Yii::t('app', 'Name'),
+            'tech_stack' => Yii::t('app', 'Tech Stack'),
+            'descritption' => Yii::t('app', 'Descritption'),
+            'start_date' => Yii::t('app', 'Start Date'),
+            'end_date' => Yii::t('app', 'End Date'),
         ];
     }
 
     /**
-     * Gets query for [[ProjectImages]]. // Phương thức để lấy truy vấn cho ProjectImages.
+     * Gets query for [[ProjectImages]].
      *
-     * @return \yii\db\ActiveQuery|yii\db\ActiveQuery // Trả về đối tượng ActiveQuery cho ProjectImage.
+     * @return \yii\db\ActiveQuery|yii\db\ActiveQuery
      */
-    public function getProjectImages() // Phương thức định nghĩa mối quan hệ với ProjectImage.
+    public function getImages()
     {
-        return $this->hasMany(ProjectImage::class, ['project_id' => 'id']); // Trả về tất cả hình ảnh liên quan đến dự án.
+        return $this->hasMany(ProjectImage::class, ['project_id' => 'id']);
     }
 
     /**
-     * Gets query for [[Testimonials]]. // Phương thức để lấy truy vấn cho Testimonials.
+     * Gets query for [[Testimonials]].
      *
-     * @return \yii\db\ActiveQuery|yii\db\ActiveQuery // Trả về đối tượng ActiveQuery cho Testimonial.
+     * @return \yii\db\ActiveQuery|yii\db\ActiveQuery
      */
-    public function getTestimonials() // Phương thức định nghĩa mối quan hệ với Testimonial.
+    public function getTestimonials()
     {
-        return $this->hasMany(Testimonial::class, ['project_id' => 'id']); // Trả về tất cả đánh giá liên quan đến dự án.
+        return $this->hasMany(Testimonial::class, ['project_id' => 'id']);
     }
 
     /**
      * {@inheritdoc}
-     * @return ProjectQuery the active query used by this AR class. // Trả về truy vấn tùy chỉnh cho mô hình Project.
+     * @return ProjectQuery the active query used by this AR class.
      */
-    public static function find() // Phương thức trả về đối tượng truy vấn tùy chỉnh.
+    public static function find()
     {
-        return new ProjectQuery(get_called_class()); // Trả về đối tượng ProjectQuery cho lớp này.
+        return new ProjectQuery(get_called_class());
     }
 
-    public function saveImage() // Phương thức để lưu tệp hình ảnh tải lên.
-    {
-        Yii::$app->db->transaction(function($db) { // Bắt đầu một giao dịch cơ sở dữ liệu.
-            $file = new File(); // Tạo một đối tượng File mới.
-            $file->name = uniqid(true) . '.' . $this->imageFile->extension; // Tạo tên tệp ngẫu nhiên với phần mở rộng.
-            $file->base_url = Yii::$app->urlManager->createAbsoluteUrl('uploads/projects'); // Tạo URL tuyệt đối cho thư mục lưu trữ.
-            $file->mine_type = mime_content_type($this->imageFile->tempName); // Lấy loại MIME từ tệp tạm thời.
-            $file->save(); // Lưu đối tượng File vào cơ sở dữ liệu.
-    
-            $projectImage = new ProjectImage(); // Tạo một đối tượng ProjectImage mới.
-            $projectImage->project_id = $this->id; // Liên kết hình ảnh với ID dự án hiện tại.
-            $projectImage->file_id = $file->id; // Liên kết hình ảnh với ID tệp đã lưu.
-            $projectImage->save(); // Lưu đối tượng ProjectImage vào cơ sở dữ liệu.
-    
-            // Lưu tệp hình ảnh vào thư mục chỉ định.
-            if (!$this->imageFile->saveAs('uploads/projects/' . $file->name)) { // Nếu không thành công trong việc lưu tệp.
-                $db->transaction->rollback(); // Hoàn tác giao dịch.
+    public function saveImage(){
+        Yii::$app->db->transaction(function($db){
+            foreach($this->imageFile as $imagesFile){
+                $file = new File();
+                $file -> name = uniqid(true). '.' . $imagesFile->extension;
+                $file -> base_url = Yii::$app->urlManager->createAbsoluteUrl('uploads/projects');
+                $file -> mine_type = mime_content_type($imagesFile->tempName);
+                $file -> save();
+        
+                $projectImage = new ProjectImage();
+                $projectImage->project_id = $this->id;
+                $projectImage-> file_id = $file-> id;
+                $projectImage->save();
+        
+                if(!$imagesFile->saveAs('uploads/projects/'. $file->name)){
+                     $db->transaction->rollback();
+                }
+             
             }
         });
+    }
+    public function hasImages(){
+        // trả về true để lấy số lượng hình ảnh nếu nó lớnhơn 0
+        return count($this->images) > 0;
+    }
+    public function imageAbsoluterUrls(){
+        $urls  = [];
+        foreach($this->images as $image){
+            $urls[] = $image->file->absoluterUrl();
+
+        }
+        return $urls;
+
+    }
+    public function imageConfig(){
+        $config = [];
+        foreach($this->images as $image){
+            $config[]= [
+                'key' => $image->id,
+            ];
+        }
+        return $config;
+    }
+    public function loadUploadedImagefiles(){
+        $this->imageFile = UploadedFile::getInstances($this,'imageFile');
     }
 }

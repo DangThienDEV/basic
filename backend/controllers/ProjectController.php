@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use common\models\Project;
 use backend\models\ProjectSearch;
+use common\models\ProjectImage;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -27,6 +28,7 @@ class ProjectController extends Controller
                     'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
+                        'delete-project-image' => ['POST'],
                     ],
                 ],
             ]
@@ -67,24 +69,25 @@ class ProjectController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate() // Phương thức tạo mới một dự án.
+    public function actionCreate()
     {
-        $model = new Project(); // Khởi tạo một đối tượng Project mới.
-    
-        if ($this->request->isPost) { // Kiểm tra xem yêu cầu có phải là POST không.
-            if ($model->load($this->request->post())) { // Tải dữ liệu từ POST vào mô hình.
-                $model->imageFile = UploadedFile::getInstance($model, 'imageFile'); // Lấy tệp hình ảnh từ yêu cầu.
-                if ($model->save()) { // Lưu mô hình vào cơ sở dữ liệu.
-                    $model->saveImage(); // Lưu hình ảnh liên quan đến dự án.
-                    Yii::$app->getSession()->setFlash('success', 'Thành Công'); // Thiết lập thông báo thành công.
-                    return $this->redirect(['view', 'id' => $model->id]); // Chuyển hướng đến trang xem dự án vừa tạo.
+        $model = new Project();
+
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post())) {
+             $model->loadUploadedImagefiles();  
+                if( $model->save()){
+                    $model->saveImage();
+                    Yii::$app->getSession()->setFlash('success','Thành Công');
+                    return $this->redirect(['view', 'id' => $model->id]);
                 }
+              
             }
         } else {
-            $model->loadDefaultValues(); // Tải các giá trị mặc định vào mô hình nếu không phải là yêu cầu POST.
+            $model->loadDefaultValues();
         }
-    
-        return $this->render('create', [ // Hiển thị trang tạo mới với mô hình đã tải.
+
+        return $this->render('create', [
             'model' => $model,
         ]);
     }
@@ -101,9 +104,13 @@ class ProjectController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            Yii::$app->getSession()->setFlash('success','Thành Công');
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $model->loadUploadedImagefiles();  
+            if ($model->save()) { // Lưu mô hình vào cơ sở dữ liệu.
+                $model->saveImage(); // Lưu hình ảnh liên quan đến dự án.
+                Yii::$app->getSession()->setFlash('success', 'Thành Công'); // Thiết lập thông báo thành công.
+                return $this->redirect(['view', 'id' => $model->id]); // Chuyển hướng đến trang xem dự án vừa tạo.
+            }
         }
 
         return $this->render('update', [
@@ -123,6 +130,28 @@ class ProjectController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+    // Hàm xóa ảnh
+    public function actionDeleteProjectImage(){
+        // lấy 1 hình ảnh theo id
+        // $image = ProjectImage::findOne($this->request->post('id'));       // kiểm tra nếu không có ảnh
+        // lấy hình ảnh theo key
+        $image = ProjectImage::findOne($this->request->post('key'));       // kiểm tra nếu không có ảnh
+ 
+        if(!$image){
+            throw new NotFoundHttpException('img not found');
+        }
+        // hàm xóa ảnh 
+        // if($image->file->delete()){
+            // truyền đúng hình ảnh cần xóa
+        //     $path = Yii::$app->params['uploads']['projects'] .'/'. $image->file->name;// lưu ý cần phải đúng đường link
+        //     unlink($path);// xóa file vật lý trong project
+        // }
+        if($image->file->delete()){
+            return json_encode(null);
+        }
+        return json_encode(['error' => true]);
+
     }
 
     /**
